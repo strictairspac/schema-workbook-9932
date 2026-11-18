@@ -6,7 +6,7 @@
 
 原先设计员在Excel里堆叠委托号、客户、检测项、方法与结果，再手工画表结构。痛点：依赖口径难确认、复合键容易漏判、拆表后无法证明无损。上游为委托单和已确认业务规则，本项目承接关系草案登记、函数依赖编辑、3NF合成、验证报告导出，下游为实验数据录入系统的数据库设计人员。
 
-核心实体：关系草案 Relation、函数依赖 Dependency、分解报告 Report。4业务页和独立登录页；管理员另有审计页。业务规则不执行为SQL，属性名是纯数据。
+核心实体：关系草案 Relation、函数依赖 Dependency、分解报告 Report、分表核验 DecompositionPlan。5业务页和独立登录页；管理员另有审计页。业务规则不执行为SQL，属性名是纯数据。
 
 ## 快速启动
 
@@ -48,13 +48,13 @@ Python真算，MySQL保存草案/依赖与结果，Redis传递任务，独立wor
 
 |服务|技术|职责|
 |---|---|---|
-|frontend|原生HTML/CSS/JS + Nginx|4业务页、登录、共享业务表格与报告组件|
+|frontend|原生HTML/CSS/JS + Nginx|5业务页、登录、共享业务表格与报告组件|
 |backend|Python3.11/FastAPI/SQLAlchemy/PyJWT|校验、权限、审计、快照与导出|
 |worker|Python3.11|闭包、候选键、3NF与chase|
 |db|MySQL8.0|JSON属性与依赖、任务报告|
 |redis|Redis7|持久任务队列|
 
-目录：`frontend/src/{api,stores,types,components/common,hooks,pages,router,utils,constants}`；`backend/src/{routes,controllers,services,models,schemas,middlewares,utils,constants,config}`；`backend/scripts/seed_demo.py`；`backend/migrations/001_initial.sql`。每核心实体贯穿模型/schema/service/route/API/store/page。组件table/badge/frame复用，hooks/session/feedback和utils/forms/html共用；request_id/errors双后端中间件。
+目录：`frontend/src/{api,stores,types,components/common,hooks,pages,router,utils,constants}`（方案核验见 `pages/plans.js`、`pages/plan.js`）；`backend/src/{routes,controllers,services,models,schemas,middlewares,utils,constants,config}`（`services/plans.py`、`services/rules.py`）；`backend/scripts/seed_demo.py`；`backend/migrations/001_initial.sql`。每核心实体贯穿模型/schema/service/route/API/store/page；方案核验另有 `services/rules.py` 维护规则语义版本。组件table/badge/frame复用，hooks/session/feedback和utils/forms/html共用；request_id/errors双后端中间件。
 
 枚举：角色admin/operator/viewer、任务queued/running/completed/failed；前后端定义位于 `backend/src/constants/enums.py` 和 `frontend/src/constants/enums.js`，security/reports、frame/badge消费；worker持久化状态。
 
